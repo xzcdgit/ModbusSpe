@@ -18,7 +18,7 @@ def calculate_crc(data):
 
 def read_holding_register(ip, port, device_id, register_address):
     error_info = ''
-    for try_time in range(3):
+    for try_time in range(3):  # 如果通讯失败，重试2次
         try:
             # 创建Modbus RTU请求帧
             request = struct.pack('>BBHH', device_id, 0x03, register_address, 0x0001)
@@ -27,7 +27,7 @@ def read_holding_register(ip, port, device_id, register_address):
 
             # 通过TCP发送请求
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(1) 
+                s.settimeout(1)
                 s.connect((ip, port))
                 s.sendall(request)
                 response = s.recv(1024)
@@ -37,7 +37,7 @@ def read_holding_register(ip, port, device_id, register_address):
                 response_crc = struct.unpack('<H', response[-2:])[0]
                 if calculate_crc(response[:-2]) == response_crc:
                     # 提取寄存器值
-                    #register_value = struct.unpack('>H', response[3:5])[0]
+                    # register_value = struct.unpack('>H', response[3:5])[0]
                     error_info = "Success"
                     break
                 else:
@@ -49,7 +49,6 @@ def read_holding_register(ip, port, device_id, register_address):
         except Exception as e:
             error_info = f'Error: {e}'
     return error_info
-        
 
 def load_file():
     file_path = filedialog.askopenfilename()
@@ -64,8 +63,12 @@ def load_file():
             start_address = row['StartAddress']
             if register_type == 'Holding':
                 value = read_holding_register(ip, port, device_id, start_address)
-                result_text.insert(tk.END, f'Name {name} at {ip}:{port} {device_id}- Register {start_address}: {value}\n')
+                result_text.insert(tk.END, f'{name:<20} {ip:<15} {port:<5} {device_id:<10} {start_address:<10} {value}\n')
                 result_text.update_idletasks()  # 刷新界面
+
+def clear_output():
+    result_text.delete(1.0, tk.END)
+    result_text.insert(tk.END, header)  # 重新插入列名称
 
 # 创建主窗口
 root = tk.Tk()
@@ -75,7 +78,13 @@ root.title("Modbus RTU Checker")
 load_button = tk.Button(root, text="Load File", command=load_file)
 load_button.pack(pady=10)
 
+clear_button = tk.Button(root, text="Clear Output", command=clear_output)
+clear_button.pack(pady=10)
+
+# 添加列名称
+header = f'{"Name":<15} {"IP":<15} {"Port":<5} {"DeviceID":<10} {"StartAddress":<10} {"Status"}\n'
 result_text = tk.Text(root, height=20, width=80)
+result_text.insert(tk.END, header)
 result_text.pack(pady=10)
 
 # 运行主循环
