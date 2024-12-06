@@ -1,0 +1,6 @@
+Name,IP,Port,DeviceID,RegisterType,StartAddress
+30#总装,10.70.50.105,8899,61,Holding,1
+空压机2,10.70.50.105,8899,62,Holding,1
+17#-富锌动力,10.70.50.105,8899,63,Holding,1
+16#-打砂房2,10.70.50.105,8899,64,Holding,1
+19#-富锌烘房,10.70.50.105,8899,65,Holding,1
