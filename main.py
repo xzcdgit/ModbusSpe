@@ -20,7 +20,7 @@ def calculate_crc(data):
 
 def read_holding_register(ip, port, device_id, register_address, timeout):
     error_info = ''
-    for try_time in range(3):  # 如果通讯失败，重试2次
+    for try_time in range(3):  # 如果通讯失败，重试x次
         try:
             # 创建Modbus RTU请求帧
             request = struct.pack('>BBHH', device_id, 0x03, register_address, 0x0001)
@@ -53,6 +53,7 @@ def read_holding_register(ip, port, device_id, register_address, timeout):
             error_info = 'Timeout'
         except Exception as e:
             error_info = f'Error: {e}'
+        time.sleep(0.5)
     return error_info
 
 def load_file():
